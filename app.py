@@ -19,23 +19,17 @@ def homepage():
 @app.route('/froyo')
 def choose_froyo():
     """Shows a form to collect the user's Fro-Yo order."""
-    return """
-    <form action="/froyo_results" method="GET">
-        What is your favorite Fro-Yo flavor? <br/>
-        <input type="text" name="flavor"><br/>
-        What do you want for the topping? <br/>
-        <input type="text" name="toppings"><br/>
-        <input type="submit" value="Submit!">
-    </form>
-    """
+    return render_template('froyo_form.html')
 
 
 @app.route('/froyo_results')
 def show_froyo_results():
     """Shows the user what they ordered from the previous page."""
-    users_froyo_flavor = request.args.get("flavor")
-    users_froyo_topping = request.args.get("toppings")
-    return f"You ordered {users_froyo_flavor} flavored Fro-Yo with toppings {users_froyo_topping}!"
+    context = {
+        'users_froyo_flavor': request.args.get("flavor"),
+        'users_froyo_topping': request.args.get("toppings")
+    }
+    return render_template('froyo_results.html', **context)
 
 
 @app.route('/favorites')
@@ -86,37 +80,31 @@ def message_results():
 @app.route('/calculator')
 def calculator():
     """Shows the user a form to enter 2 numbers and an operation."""
-    return """
-    <form action="/calculator_results" method="GET">
-        Please enter 2 numbers and select an operator.<br/><br/>
-        <input type="number" name="operand1">
-        <select name="operation">
-            <option value="add">+</option>
-            <option value="subtract">-</option>
-            <option value="multiply">*</option>
-            <option value="divide">/</option>
-        </select>
-        <input type="number" name="operand2">
-        <input type="submit" value="Submit!">
-    </form>
-    """
+    return render_template('calculator_form.html')
 
 
 @app.route('/calculator_results')
 def calculator_results():
     """Shows the user the result of their calculation."""
-    user_operand1 = request.args.get('operand1')
-    user_operand2 = request.args.get('operand2')
+    user_operand1 = int(request.args.get('operand1'))
+    user_operand2 = int(request.args.get('operand2'))
     user_operation = request.args.get('operation')
-    if user_operand1.isdigit() and user_operand2.isdigit():
-        if user_operation == 'add':
-            return f'You choose to {user_operation} {user_operand1} and {user_operand2}. Your result is: {int(user_operand1)+int(user_operand2)}'
-        elif user_operation == 'subtract':
-            return f'You choose to {user_operation} {user_operand1} and {user_operand2}. Your result is: {int(user_operand1)-int(user_operand2)}'
-        elif user_operation == 'multiply':
-            return f'You choose to {user_operation} {user_operand1} and {user_operand2}. Your result is: {int(user_operand1)*int(user_operand2)}'
-        elif user_operation == 'divide':
-            return f'You choose to {user_operation} {user_operand1} and {user_operand2}. Your result is: {int(user_operand1)/int(user_operand2)}'
+    result = 0
+    if user_operation == 'add':
+        result = user_operand1 + user_operand2
+    elif user_operation == 'subtract':
+        result = user_operand1 - user_operand2
+    elif user_operation == 'multiply':
+        result = user_operand1 * user_operand2
+    elif user_operation == 'divide':
+        result = user_operand1 / user_operand2
+    context = {
+        'user_operand1': user_operand1,
+        'user_operand2': user_operand2,
+        'user_operation': user_operation,
+        'result': result
+    }
+    return render_template('calculator_results.html', **context)
 
 
 # List of compliments to be used in the `compliments_results` route (feel free
@@ -159,9 +147,10 @@ def compliments():
 def compliments_results():
     """Show the user some compliments."""
     context = {
-        # TODO: Enter your context variables here.
+        'users_name': request.args.get('users_name'),
+        'wants_compliments': request.args.get('wants_compliments'),
+        'compliments': random.sample(list_of_compliments, k=int(request.args.get('num_compliments')))
     }
-
     return render_template('compliments_results.html', **context)
 
 
